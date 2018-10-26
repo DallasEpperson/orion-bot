@@ -1,0 +1,24 @@
+{
+  "name": "orion-bot",
+  "version": "1.0.0",
+  "description": "Orion is a Slack bot who lives in my basement.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DallasEpperson/orion-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DallasEpperson/orion-bot/issues"
+  },
+  "homepage": "https://github.com/DallasEpperson/orion-bot#readme",
+  "dependencies": {
+    "@slack/client": "^4.8.0",
+    "glob": "^7.1.3",
+    "request": "^2.88.0"
+  }
+}
