@@ -43,11 +43,16 @@ let processMessage = function(event){
 };
 
 rtm.on('message', (event) => {
-    if ( (event.subtype && event.subtype === 'bot_message') || (!event.subtype && event.user === rtm.activeUserId) )
+    let myId = rtm.activeUserId;
+    if ( (event.subtype && event.subtype === 'bot_message') || (!event.subtype && event.user === myId) )
         return;
     
     console.log(`(channel:${event.channel}) ${event.user} says: ${event.text}`);
-
-    if(event.text.toLowerCase().includes('orion'))
+    
+    if(event.channel.startsWith('DD')){ //Direct messages begin with DD
         processMessage(event);
+    }else{ //Group (GD*) or channel (CD*) messages
+        if(event.text.includes('<@' + myId + '>'))
+            processMessage(event);
+    }
 });
