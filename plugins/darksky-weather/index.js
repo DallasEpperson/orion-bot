@@ -1,6 +1,8 @@
 var request = require('request');
 var darkskyConfig = require('./darksky.config.json');
 
+let generalForecastRgx = /((what( is|'s| will|'ll)?)|((tell|show) me))\sthe\s(weather|forecast|weather forecast)\s(for |be (like )?)?(tomorrow|today|tonight)/gmi;
+
 let getWeatherIconFor = function(darkskyIcon){
     switch (darkskyIcon) {
         case 'clear-day':
@@ -30,15 +32,24 @@ let getWeatherIconFor = function(darkskyIcon){
 module.exports.PluginName = 'Dark Sky Weather';
 
 module.exports.CanHandleMessage = function(messageText){
-    return messageText.toLowerCase().includes('weather');
+    if(generalForecastRgx.test(messageText))
+        return true;
+    
+    return false; //TODO add more specifiec rgx, like "tell me the humidity for tomorrow"
 };
 
 module.exports.HandleMessage = function(event, sendMsg){
-    request('https://api.darksky.net/forecast/' + darkskyConfig.apiKey + '/' + darkskyConfig.latLong, 
+    //TODO determine time requested instead of this hardcoded tomorrow val
+    let tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate()+1);
+    tomorrow.setHours(12,0,0,0);
+    
+    request('https://api.darksky.net/forecast/' + darkskyConfig.apiKey + '/' + darkskyConfig.latLong + ',' + Math.round(tomorrow.getTime() / 1000), 
         function (error, response, body){
             let weatherInfo = JSON.parse(body);
+            //TODO reply with time requested
             let responseStr = getWeatherIconFor(weatherInfo.currently.icon)
-                + ' Currently, it is ' + weatherInfo.currently.summary 
+                + ' Tomorrow at noon, it will be ' + weatherInfo.currently.summary 
                 + ' and ' + Math.round(weatherInfo.currently.temperature) + '°F.';
             
             sendMsg(responseStr, event.channel);
