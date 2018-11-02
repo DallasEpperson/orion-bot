@@ -5,7 +5,7 @@ const path = require('path');
 const log = require('./logging');
 const pluginPath = './plugins/';
 
-log.internal("Orion-Bot Started.");
+log.startup();
 
 let pluginFiles = glob.sync(path.join(pluginPath, '*/index.js'));
 let loadedPlugins = [];
