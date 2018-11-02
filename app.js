@@ -1,9 +1,9 @@
-var appconfig = require('./app.config.json');
-
+const appconfig = require('./app.config.json');
 const { RTMClient, WebClient } = require('@slack/client');
-var glob = require('glob');
-var path = require('path');
-var pluginPath = './plugins/';
+const chalk = require('chalk');
+const glob = require('glob');
+const path = require('path');
+const pluginPath = './plugins/';
 
 let pluginFiles = glob.sync(path.join(pluginPath, '*/index.js'));
 let loadedPlugins = [];
