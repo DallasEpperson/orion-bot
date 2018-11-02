@@ -21,7 +21,6 @@ for (let i = 0; i < loadedPlugins.length; i++) {
 log.internal(pluginLoadReport);
 
 const rtm = new RTMClient(appconfig.slackToken);
-rtm.start();
 
 let sendMsg = function(message, channel){
     rtm.sendMessage(message, channel)
@@ -60,3 +59,29 @@ rtm.on('message', (event) => {
         log.ignored(`${event.user} in ${event.channel} says: ${event.text}`);
     }
 });
+
+rtm.on('connected', () => {
+    log.internal('Connected to Slack.');
+});
+
+rtm.on('connecting', () => {
+    log.internal('Connecting to Slack...');
+});
+
+rtm.on('disconnected', () => {
+    log.internal('Disconnected from Slack.');
+});
+
+rtm.on('disconnecting', () => {
+    log.internal('Disconnecting from Slack...');
+});
+
+rtm.on('error', (err) => {
+    log.error(`Slack error code: ${err.code}`);
+});
+
+rtm.on('reconecting', () => {
+    log.internal('Connection to Slack lost. Reconnecting...');
+});
+
+rtm.start();
