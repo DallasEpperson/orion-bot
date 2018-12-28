@@ -1,0 +1,13 @@
+[Unit]
+Description=Orion Slack Bot
+
+[Service]
+ExecStart=/hom/pi/Documents/dev/orion-bot/app.js
+Restart=always
+User=nobody
+Group=nogroup
+Environment=PATH=/usr/bin:/usr/local/bin
+WorkingDirectory=/home/pi/Documents/dev/orion-bot
+
+[Install]
+WantedBy=multi-user.target

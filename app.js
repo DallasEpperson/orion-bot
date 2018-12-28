@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const appconfig = require('./app.config.json');
 const { RTMClient, WebClient } = require('@slack/client');
 const glob = require('glob');

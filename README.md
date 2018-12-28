@@ -20,3 +20,13 @@ Orion is a Slack bot who lives in my basement. He is extendable via plugins, mak
 ## Usage
 
 Orion will respond when he is @mentioned, or to any direct messages.
+
+## Running on system startup (as a service)
+
+### Linux
+
+* Modify `orion-bot.service` to point to your particular paths
+* Copy `orion-bot.service` to `/etc/systemd/system/orion-bot.service`
+* Start via `systemctl start orion-bot`
+* Enable run on startup via `systemctl enable orion-bot`
+* See output logs via `tail -f /var/log/syslog`
