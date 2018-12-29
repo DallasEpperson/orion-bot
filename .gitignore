@@ -62,4 +62,4 @@ typings/
 
 # Orion-bot specific
 app.config.json
-plugins/*/*.config.json
+plugins/

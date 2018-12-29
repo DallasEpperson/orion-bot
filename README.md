@@ -21,6 +21,12 @@ Orion is a Slack bot who lives in my basement. He is extendable via plugins, mak
 
 Orion will respond when he is @mentioned, or to any direct messages.
 
+## Plugins
+
+* [Dark Sky](https://github.com/DallasEpperson/orion-bot-darksky) - Adds Dark Sky weather forecasting to Orion
+* [Public IP](https://github.com/DallasEpperson/orion-bot-public-ip) - Adds ability for Orion to report its public IP address
+* [weeWX](https://github.com/DallasEpperson/orion-bot-weewx) - Adds ability to pull current and past weather information from weeWX into Orion
+
 ## Running on system startup (as a service)
 
 ### Linux
