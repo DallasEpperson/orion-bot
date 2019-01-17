@@ -47,10 +47,44 @@ let processMessage = function(event){
 
 rtm.on('message', (event) => {
     let myId = rtm.activeUserId;
-    if ((event.subtype && event.subtype === 'bot_message') || (!event.subtype && event.user === myId))
+    if ((!event.subtype && event.user === myId))
         return;
+    
+    if(event.subtype){
+        switch(event.subtype){
+            case 'bot_message':
+            case 'channel_archive':
+            case 'channel_join':
+            case 'channel_leave':
+            case 'channel_name':
+            case 'channel_purpose':
+            case 'channel_topic':
+            case 'channel_unarchive':
+            case 'file_comment':
+            case 'file_mention':
+            case 'file_share':
+            case 'group_archive':
+            case 'group_join':
+            case 'group_leave':
+            case 'group_name':
+            case 'group_purpose':
+            case 'group_topic':
+            case 'group_unarchive':
+            case 'me_message':
+            case 'message_changed':
+            case 'message_deleted':
+            case 'message_replied':
+            case 'pinned_item':
+            case 'reply_broadcast':
+            case 'thread_broadcast':
+            case 'unpinned_item':
+                return;
+            default:
+                break;
+        }
+    }
         
-    if(event.channel.startsWith('DD')){ //Direct messages begin with DD
+    if(event.channel.startsWith('D')){ //Direct messages begin with D
         log.acknowledged(`${event.user} in ${event.channel} says: ${event.text}`);
         processMessage(event);
     }else if(event.text.includes('<@' + myId + '>')){ //Group (GD*) or channel (CD*) messages
