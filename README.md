@@ -25,7 +25,8 @@ Orion will respond when he is @mentioned, or to any direct messages.
 
 * [Dark Sky](https://github.com/DallasEpperson/orion-bot-darksky) - Adds Dark Sky weather forecasting to Orion
 * [Public IP](https://github.com/DallasEpperson/orion-bot-public-ip) - Adds ability for Orion to report its public IP address
-* [QRZ.com](https://github.com/DallasEpperson/orion-bot-qrz) - Adds ability to query amateur radio callsign infor
+* [QRZ.com](https://github.com/DallasEpperson/orion-bot-qrz) - Adds ability to query amateur radio callsign info
+* [URL](https://github.com/DallasEpperson/orion-bot-urls) - Adds ability to query for known URLs
 * [weeWX](https://github.com/DallasEpperson/orion-bot-weewx) - Adds ability to pull current and past weather information from weeWX into Orion
 
 ## Running on system startup (as a service)
