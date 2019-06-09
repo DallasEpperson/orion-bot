@@ -17,22 +17,24 @@ module.exports = {
         console.log(`[${(new Date).getTime()}] ` + chalk.green(message));
     },
     startup: function(){
-        console.log(' * *');
-        console.log('/ /');
-        console.log(`**      ` + chalk.cyan('ORION') +`           *`);
-        console.log(' \\                     *');
-        console.log('  *                     \\');
-        console.log('   \\    __/*\\            |');
-        console.log('    *--/     \\           *');
-        console.log('     \\        *----------*');
-        console.log('      \\       /          *');
-        console.log('       \\     |          *');
-        console.log('        \\* * *\\        *');
-        console.log('        |      *');
-        console.log('       /        \\');
-        console.log('      |          \\');
-        console.log('     /     _____/*');
-        console.log('    *-----/');
+        var constellation = chalk`
+{white  * *}
+/ /
+{white **}      {cyan ORION}
+ \\                     {white *}
+  {white *}                     \\
+   \\    __/{white *}\\            |
+    {white *}--/     \\           {white *}
+     \\        {white *}----------{white *}
+      \\       /          {white *}
+       \\     |          {white *}
+        \\{white * * *}\\        {white *}
+        |      {white *}
+       /        \\
+      |          \\
+     /     _____/{white *}
+    {white *}-----/`;
+        console.log(chalk.gray(constellation));
         console.log(`[${(new Date).getTime()}] Orion-Bot Started.`);
     }
 };
