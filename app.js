@@ -12,6 +12,7 @@ let pluginFiles = glob.sync(path.join(pluginPath, '*/index.js'));
 let loadedPlugins = [];
 for (let i = 0; i < pluginFiles.length; i++) {
     let loadedPlugin = require('./' + pluginFiles[i]);
+    if(loadedPlugin.init) loadedPlugin.init();
     loadedPlugins.push(loadedPlugin);
 }
 
