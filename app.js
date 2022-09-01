@@ -5,6 +5,7 @@ const {App: SlackApp, LogLevel} = require('@slack/bolt');
 const glob = require('glob');
 const path = require('path');
 const log = require('./logging');
+const semver = require('semver');
 
 const slackApp = new SlackApp({
     token: process.env.SLACK_BOT_TOKEN,
@@ -16,13 +17,25 @@ const slackApp = new SlackApp({
     logLevel: LogLevel.WARN
 });
 
+const orionVersion = require('./package.json').version;
+
 var loadedPlugins = [];
 
 const loadPlugins = async () => {
     const pluginPath = './plugins/';
+    log.internal(`Scanning ${pluginPath} for plugins.`);
     let pluginFiles = glob.sync(path.join(pluginPath, '*/index.js'));
     for (let i = 0; i < pluginFiles.length; i++) {
         let loadedPlugin = require('./' + pluginFiles[i]);
+        if(!loadedPlugin.WrittenForVersion || !semver.valid(loadedPlugin.WrittenForVersion)){
+            log.error(`Plugin "${loadedPlugin.PluginName}" was not written for this version of Orion.`);
+            continue;
+        }
+
+        if(semver.diff(orionVersion, loadedPlugin.WrittenForVersion) == 'major'){
+            log.error(`Plugin "${loadedPlugin.PluginName}" was written for a different major version of Orion (${loadedPlugin.WrittenForVersion}). Attempting to load regardless.`);
+        }
+
         if(!loadedPlugin.init){
             loadedPlugins.push(loadedPlugin);
             continue;
@@ -36,7 +49,7 @@ const loadPlugins = async () => {
     }
     let pluginLoadReport = `Loaded the following ${loadedPlugins.length} plugins:`;
     for (let i = 0; i < loadedPlugins.length; i++) {
-        pluginLoadReport += '\n  ' + loadedPlugins[i].PluginName;
+        pluginLoadReport += `\n  ${loadedPlugins[i].PluginName} Version ${loadedPlugins[i].Version}`;
     }
     log.internal(pluginLoadReport);
 };
