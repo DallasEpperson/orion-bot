@@ -1,131 +1,76 @@
 #!/usr/bin/env node
-const appconfig = require('./app.config.json');
-const { RTMClient, WebClient } = require('@slack/client');
+require('dotenv').config();
+
+const {App: SlackApp, LogLevel} = require('@slack/bolt');
 const glob = require('glob');
 const path = require('path');
 const log = require('./logging');
-const pluginPath = './plugins/';
+const semver = require('semver');
 
-log.startup();
+const slackApp = new SlackApp({
+    token: process.env.SLACK_BOT_TOKEN,
+    signingSecret: process.env.SLACK_SIGNING_SECRET,
+    socketMode: true,
+    appToken: process.env.SLACK_APP_TOKEN,
+    port: process.env.PORT || 3000,
+    deferInitialization: true,
+    logLevel: LogLevel.WARN
+});
 
-let pluginFiles = glob.sync(path.join(pluginPath, '*/index.js'));
-let loadedPlugins = [];
-for (let i = 0; i < pluginFiles.length; i++) {
-    let loadedPlugin = require('./' + pluginFiles[i]);
-    if(!loadedPlugin.init){
-        loadedPlugins.push(loadedPlugin);
-        continue;
-    }
-    try{
-        loadedPlugin.init();
-        loadedPlugins.push(loadedPlugin);
-    }catch(initErr){
-        log.error(`Plugin "${loadedPlugin.PluginName}" not loaded. Reason:\n${initErr}`);
-    }
-}
+const orionVersion = require('./package.json').version;
 
-let pluginLoadReport = 'Loaded the following ' + loadedPlugins.length + ' plugins:';
-for (let i = 0; i < loadedPlugins.length; i++) {
-    pluginLoadReport += '\n  ' + loadedPlugins[i].PluginName;
-}
-log.internal(pluginLoadReport);
+const loadPlugins = async () => {
+    let loadedPlugins = [];
+    const pluginPath = './plugins/';
+    log.internal(`Scanning ${pluginPath} for plugins.`);
+    let pluginFiles = glob.sync(path.join(pluginPath, '*/index.js'));
+    for (let i = 0; i < pluginFiles.length; i++) {
+        let loadedPlugin = require('./' + pluginFiles[i]);
+        if(!loadedPlugin.WrittenForVersion || !semver.valid(loadedPlugin.WrittenForVersion)){
+            log.error(`Plugin "${loadedPlugin.PluginName}" was not written for this version of Orion.`);
+            continue;
+        }
 
-const rtm = new RTMClient(appconfig.slackToken);
+        if(semver.diff(orionVersion, loadedPlugin.WrittenForVersion) == 'major'){
+            log.error(`Plugin "${loadedPlugin.PluginName}" was written for a different major version of Orion (${loadedPlugin.WrittenForVersion}). Attempting to load regardless.`);
+        }
 
-let sendMsg = function(message, channel){
-    rtm.sendMessage(message, channel)
-        .then((msg) => log.response(`Orion-Bot to ${channel}: ${message}`))
-        .catch((reason) => log.error(reason));
-};
-
-let processMessage = function(event){
-    let chosenPlugin = undefined;
-    for (let i = 0; i < loadedPlugins.length; i++) {
-        if(loadedPlugins[i].CanHandleMessage(event.text)){
-            chosenPlugin = loadedPlugins[i];
-            break;
+        if(!loadedPlugin.init){
+            loadedPlugins.push(loadedPlugin);
+            continue;
+        }
+        try {
+            loadedPlugin.init();
+            loadedPlugins.push(loadedPlugin);
+        } catch(initErr){
+            log.error(`Plugin "${loadedPlugin.PluginName}" not loaded. Reason:\n${initErr}`);
         }
     }
-
-    if(chosenPlugin){
-        chosenPlugin.HandleMessage(event, sendMsg);
-    }else{
-        sendMsg("I don't know how to handle that request.", event.channel);
-    }
+    let pluginLoadReport = [`Loaded the following ${loadedPlugins.length} plugins:`];
+    pluginLoadReport = pluginLoadReport.concat(...loadedPlugins.map((a) => {return `  ${a.PluginName} Version ${a.Version}`}));
+    log.internal(pluginLoadReport.join('\n'));
+    return loadedPlugins;
 };
 
-rtm.on('message', (event) => {
-    let myId = rtm.activeUserId;
-    if ((!event.subtype && event.user === myId))
-        return;
-    
-    if(event.subtype){
-        switch(event.subtype){
-            case 'bot_message':
-            case 'channel_archive':
-            case 'channel_join':
-            case 'channel_leave':
-            case 'channel_name':
-            case 'channel_purpose':
-            case 'channel_topic':
-            case 'channel_unarchive':
-            case 'file_comment':
-            case 'file_mention':
-            case 'file_share':
-            case 'group_archive':
-            case 'group_join':
-            case 'group_leave':
-            case 'group_name':
-            case 'group_purpose':
-            case 'group_topic':
-            case 'group_unarchive':
-            case 'me_message':
-            case 'message_changed':
-            case 'message_deleted':
-            case 'message_replied':
-            case 'pinned_item':
-            case 'reply_broadcast':
-            case 'thread_broadcast':
-            case 'unpinned_item':
-                return;
-            default:
-                break;
+const registerMessageHandlers = async (slackApp, plugins) => {
+    log.internal("Registering message handlers");
+    let c = 0;
+    for (let i = 0; i < plugins.length; i++) {
+        const plugin = plugins[i];
+        for (let j = 0; j < plugin.MessageHandlers.length; j++) {
+            const handler = plugin.MessageHandlers[j];
+            slackApp.message(handler.syntax, handler.handler);
+            c++;
         }
     }
-        
-    if(event.channel.startsWith('D')){ //Direct messages begin with D
-        log.acknowledged(`${event.user} in ${event.channel} says: ${event.text}`);
-        processMessage(event);
-    }else if(event.text.includes('<@' + myId + '>')){ //Group (GD*) or channel (CD*) messages
-        log.acknowledged(`${event.user} in ${event.channel} says: ${event.text}`);
-        processMessage(event);
-    }else{
-        log.ignored(`${event.user} in ${event.channel} says: ${event.text}`);
-    }
-});
+    log.internal(`Registered ${c} message handlers.`);
+};
 
-rtm.on('connected', () => {
-    log.internal('Connected to Slack.');
-});
-
-rtm.on('connecting', () => {
-    log.internal('Connecting to Slack...');
-});
-
-rtm.on('disconnected', () => {
-    log.internal('Disconnected from Slack.');
-});
-
-rtm.on('disconnecting', () => {
-    log.internal('Disconnecting from Slack...');
-});
-
-rtm.on('error', (err) => {
-    log.error(`Slack error code: ${err.code}`);
-});
-
-rtm.on('reconecting', () => {
-    log.internal('Connection to Slack lost. Reconnecting...');
-});
-
-rtm.start();
+(async () => {
+    log.startup();
+    let plugins = await loadPlugins();
+    await slackApp.init();
+    await slackApp.start();
+    log.internal("Connected to Slack.");
+    await registerMessageHandlers(slackApp, plugins);
+})();

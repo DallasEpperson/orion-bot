@@ -16,6 +16,9 @@ module.exports = {
     response: function(message){
         console.log(`[${(new Date).getTime()}] ` + chalk.green(message));
     },
+
+    /**Prints startup constellation
+     */
     startup: function(){
         var constellation = chalk`
 {white  * *}
@@ -33,7 +36,8 @@ module.exports = {
        /        \\
       |          \\
      /     _____/{white *}
-    {white *}-----/`;
+    {white *}-----/
+    {cyan Version ${require('./package.json').version}}`;
         console.log(chalk.gray(constellation));
         console.log(`[${(new Date).getTime()}] Orion-Bot Started.`);
     }
