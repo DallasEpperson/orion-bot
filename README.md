@@ -13,8 +13,8 @@ Orion is a Slack bot who lives in my basement. He is extendable via plugins, mak
 
 * Clone the repo
 * `npm install`
-* Copy `app.exampleconfig.json` to `app.config.json` and replace API Token
-* Find any other `plugins/*/*.exampleconfig.json` files and fix accordingly.
+* Copy `example.env` to `.env` and replace Signing Secret, Bot Token, and App Token.
+* Find any `plugins/*/*.exampleconfig.json` files and fix accordingly.
 * `node app.js`
 
 ## Usage

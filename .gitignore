@@ -61,5 +61,5 @@ typings/
 .next
 
 # Orion-bot specific
-app.config.json
+.env
 plugins/

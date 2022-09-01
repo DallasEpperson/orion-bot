@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+require('dotenv').config();
+
 const appconfig = require('./app.config.json');
 const { RTMClient, WebClient } = require('@slack/client');
 const glob = require('glob');
