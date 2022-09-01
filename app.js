@@ -46,11 +46,9 @@ const loadPlugins = async () => {
             log.error(`Plugin "${loadedPlugin.PluginName}" not loaded. Reason:\n${initErr}`);
         }
     }
-    let pluginLoadReport = `Loaded the following ${loadedPlugins.length} plugins:`;
-    for (let i = 0; i < loadedPlugins.length; i++) {
-        pluginLoadReport += `\n  ${loadedPlugins[i].PluginName} Version ${loadedPlugins[i].Version}`;
-    }
-    log.internal(pluginLoadReport);
+    let pluginLoadReport = [`Loaded the following ${loadedPlugins.length} plugins:`];
+    pluginLoadReport = pluginLoadReport.concat(...loadedPlugins.map((a) => {return `  ${a.PluginName} Version ${a.Version}`}));
+    log.internal(pluginLoadReport.join('\n'));
     return loadedPlugins;
 };
 
