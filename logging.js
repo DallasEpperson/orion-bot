@@ -36,7 +36,8 @@ module.exports = {
        /        \\
       |          \\
      /     _____/{white *}
-    {white *}-----/`;
+    {white *}-----/
+    {cyan Version ${require('./package.json').version}}`;
         console.log(chalk.gray(constellation));
         console.log(`[${(new Date).getTime()}] Orion-Bot Started.`);
     }
