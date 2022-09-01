@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/DallasEpperson/orion-bot#readme",
   "dependencies": {
+    "@slack/bolt": "^3.12.1",
     "chalk": "^2.4.1",
     "dotenv": "^16.0.2",
     "glob": "^7.1.3"

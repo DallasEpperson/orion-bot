@@ -1,15 +1,25 @@
 #!/usr/bin/env node
 require('dotenv').config();
 
+const {App: SlackApp, LogLevel} = require('@slack/bolt');
 const glob = require('glob');
 const path = require('path');
 const log = require('./logging');
 
-const pluginPath = './plugins/';
+const slackApp = new SlackApp({
+    token: process.env.SLACK_BOT_TOKEN,
+    signingSecret: process.env.SLACK_SIGNING_SECRET,
+    socketMode: true,
+    appToken: process.env.SLACK_APP_TOKEN,
+    port: process.env.PORT || 3000,
+    deferInitialization: true,
+    logLevel: LogLevel.WARN
+});
 
 var loadedPlugins = [];
 
 const loadPlugins = async () => {
+    const pluginPath = './plugins/';
     let pluginFiles = glob.sync(path.join(pluginPath, '*/index.js'));
     for (let i = 0; i < pluginFiles.length; i++) {
         let loadedPlugin = require('./' + pluginFiles[i]);
@@ -34,7 +44,9 @@ const loadPlugins = async () => {
 (async () => {
     log.startup();
     await loadPlugins();
-    
+    await slackApp.init();
+    await slackApp.start();
+    log.internal("Connected to Slack.");
 })();
 
 
