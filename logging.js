@@ -16,6 +16,9 @@ module.exports = {
     response: function(message){
         console.log(`[${(new Date).getTime()}] ` + chalk.green(message));
     },
+
+    /**Prints startup constellation
+     */
     startup: function(){
         var constellation = chalk`
 {white  * *}
