@@ -19,9 +19,8 @@ const slackApp = new SlackApp({
 
 const orionVersion = require('./package.json').version;
 
-var loadedPlugins = [];
-
 const loadPlugins = async () => {
+    let loadedPlugins = [];
     const pluginPath = './plugins/';
     log.internal(`Scanning ${pluginPath} for plugins.`);
     let pluginFiles = glob.sync(path.join(pluginPath, '*/index.js'));
@@ -52,14 +51,30 @@ const loadPlugins = async () => {
         pluginLoadReport += `\n  ${loadedPlugins[i].PluginName} Version ${loadedPlugins[i].Version}`;
     }
     log.internal(pluginLoadReport);
+    return loadedPlugins;
+};
+
+const registerMessageHandlers = async (slackApp, plugins) => {
+    log.internal("Registering message handlers");
+    let c = 0;
+    for (let i = 0; i < plugins.length; i++) {
+        const plugin = plugins[i];
+        for (let j = 0; j < plugin.MessageHandlers.length; j++) {
+            const handler = plugin.MessageHandlers[j];
+            slackApp.message(handler.syntax, handler.handler);
+            c++;
+        }
+    }
+    log.internal(`Registered ${c} message handlers.`);
 };
 
 (async () => {
     log.startup();
-    await loadPlugins();
+    let plugins = await loadPlugins();
     await slackApp.init();
     await slackApp.start();
     log.internal("Connected to Slack.");
+    await registerMessageHandlers(slackApp, plugins);
 })();
 
 
